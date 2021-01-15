@@ -8,12 +8,22 @@ const onePageArticleCount = 10;
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.get("/newFeeds", async (req, res) => {
-  const limit = Number(req.params.limit || 10);
-  const offset = Number(req.params.offset || 0);
-  const data = await newsArticleModel.find({}).skip(offset).limit(limit);
+const verify = (result) => {
+  if (Number(result) && result > 0) {
+    return true;
+  }
+  return false;
+};
 
-  res.send(data);
+app.get("/newFeeds", async (req, res) => {
+  const limit = verify(req.query.limit) ? Number(req.query.limit) : 10;
+  const offset = verify(req.query.offset) ? Number(req.query.offset) : 0;
+  let total = 0;
+  const result = data.filter((value, idx) => {
+    return idx >= offset && total++ < limit;
+  });
+
+  res.status(200).send(result);
 });
 
 app.listen(port, () => console.log(`App listening on port ${port}!`));
