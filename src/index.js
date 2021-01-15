@@ -3,7 +3,6 @@ const app = express();
 const port = 8080;
 const { newsArticleModel } = require("./connector");
 const onePageArticleCount = 10;
-const { data } = require("./data");
 
 // Parse JSON bodies (as sent by API clients)
 app.use(express.urlencoded({ extended: false }));
@@ -19,12 +18,9 @@ const verify = (result) => {
 app.get("/newFeeds", async (req, res) => {
   const limit = verify(req.query.limit) ? Number(req.query.limit) : 10;
   const offset = verify(req.query.offset) ? Number(req.query.offset) : 0;
-  let total = 0;
-  const result = data.filter((value, idx) => {
-    return idx >= offset && total++ < limit;
-  });
+  const data = await newsArticleModel.find({}).skip(offset).limit(limit);
 
-  res.status(200).send(result);
+  res.status(200).send(data);
 });
 
 app.listen(port, () => console.log(`App listening on port ${port}!`));
